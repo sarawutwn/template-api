@@ -1,12 +1,12 @@
-import { inject, injectable } from "tsyringe";
+import { IUser } from '@/domains/users.domain';
+import { HttpError } from '@/utils/error.utils';
 import {
   type IUserAuthRepository,
   IUserAuthRepositoryToken,
-} from "@modules/auth/applications/ports/user-auth.repository";
-import { IUser } from "@/domains/users.domain";
-import { HttpError } from "@/utils/error.utils";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+} from '@modules/auth/applications/ports/user-auth.repository';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { inject, injectable } from 'tsyringe';
 
 export interface ISignInUsecaseCommand {
   email: string;
@@ -19,8 +19,8 @@ export interface ISignInUsecaseResult {
 }
 
 export enum ESignInUsecaseError {
-  USER_NOT_FOUND = "USER_NOT_FOUND",
-  INVALID_PASSWORD = "INVALID_PASSWORD",
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  INVALID_PASSWORD = 'INVALID_PASSWORD',
 }
 
 @injectable()
@@ -52,10 +52,7 @@ export class SignInUsecase {
     return user;
   }
 
-  async validatePassword(
-    password: string,
-    hashedPassword: string,
-  ): Promise<void> {
+  async validatePassword(password: string, hashedPassword: string): Promise<void> {
     const isValid = await bcrypt.compare(password, hashedPassword);
     if (!isValid) {
       throw new HttpError(401, ESignInUsecaseError.INVALID_PASSWORD);
@@ -64,13 +61,13 @@ export class SignInUsecase {
 
   async generateToken(user: IUser): Promise<string> {
     return jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
+      expiresIn: '1h',
     });
   }
 
   async generateRefreshToken(user: IUser): Promise<string> {
     return jwt.sign({ userId: user.id }, process.env.REFRESH_TOKEN_SECRET!, {
-      expiresIn: "7d",
+      expiresIn: '7d',
     });
   }
 }

@@ -1,17 +1,15 @@
-import { Elysia, t } from "elysia";
-import { SignInUsecase } from "@modules/auth/applications/usecases/sign-in.usecase";
-import { inject, injectable } from "tsyringe";
+import { SignInUsecase } from '@modules/auth/applications/usecases/sign-in.usecase';
+import { Elysia, t } from 'elysia';
+import { inject, injectable } from 'tsyringe';
 
 @injectable()
 export class UserAuthElysiaController {
-  constructor(
-    @inject(SignInUsecase) private readonly signInUsecase: SignInUsecase,
-  ) {}
+  constructor(@inject(SignInUsecase) private readonly signInUsecase: SignInUsecase) {}
 
   registerRoute(service: Elysia) {
-    return service.group("/auth", (app) => {
+    return service.group('/auth', (app) => {
       app.post(
-        "/sign-in",
+        '/sign-in',
         async ({ body }) => {
           const result = await this.signInUsecase.execute({
             email: body.email,
@@ -32,6 +30,6 @@ export class UserAuthElysiaController {
   }
 
   getRoutes() {
-    return this.registerRoute(new Elysia({ tags: ["auth"] }));
+    return this.registerRoute(new Elysia({ tags: ['auth'] }));
   }
 }

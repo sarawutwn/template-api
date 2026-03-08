@@ -1,15 +1,15 @@
-import 'reflect-metadata';
-import { faker } from '@faker-js/faker';
-import { mock, MockProxy } from 'vitest-mock-extended';
-import { SignInUsecase, ESignInUsecaseError } from './sign-in.usecase';
 import { IUserAuthRepository } from '../ports/user-auth.repository';
-import { IUser, UserId } from '@/domains/users.domain';
+import { ESignInUsecaseError, SignInUsecase } from './sign-in.usecase';
 import { IRole, RoleId } from '@/domains/roles.domain';
+import { IUser, UserId } from '@/domains/users.domain';
 import { HttpError } from '@/utils/error.utils';
+import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import 'reflect-metadata';
 import { vi } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { MockProxy, mock } from 'vitest-mock-extended';
 
 describe('SignInUsecase', () => {
   const userAuthRepository: MockProxy<IUserAuthRepository> = mock<IUserAuthRepository>();
@@ -49,7 +49,7 @@ describe('SignInUsecase', () => {
       const email = faker.internet.email();
       const password = faker.internet.password();
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+
       const user = createUser({ email, password: hashedPassword });
 
       userAuthRepository.getUserByEmail.mockResolvedValue(user);
@@ -60,10 +60,13 @@ describe('SignInUsecase', () => {
       // Assert
       expect(result.token).toBeDefined();
       expect(result.refreshToken).toBeDefined();
-      
+
       const decodedToken = jwt.verify(result.token, process.env.JWT_SECRET!) as { userId: string };
-      const decodedRefreshToken = jwt.verify(result.refreshToken, process.env.REFRESH_TOKEN_SECRET!) as { userId: string };
-      
+      const decodedRefreshToken = jwt.verify(
+        result.refreshToken,
+        process.env.REFRESH_TOKEN_SECRET!,
+      ) as { userId: string };
+
       expect(decodedToken.userId).toBe(user.id);
       expect(decodedRefreshToken.userId).toBe(user.id);
       expect(userAuthRepository.getUserByEmail).toHaveBeenCalledWith(email);
@@ -189,11 +192,11 @@ describe('SignInUsecase', () => {
       // Assert
       const decoded = jwt.decode(token) as jwt.JwtPayload;
       expect(decoded.exp).toBeDefined();
-      
+
       const expiryTime = new Date(decoded.exp! * 1000);
       const now = new Date();
       const diffInHours = (expiryTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-      
+
       expect(diffInHours).toBeCloseTo(1, 0);
     });
 
@@ -205,7 +208,9 @@ describe('SignInUsecase', () => {
       const user = createUser();
 
       // Act & Assert
-      await expect(useCase.generateToken(user)).rejects.toThrow('secretOrPrivateKey must have a value');
+      await expect(useCase.generateToken(user)).rejects.toThrow(
+        'secretOrPrivateKey must have a value',
+      );
 
       process.env.JWT_SECRET = originalSecret;
     });
@@ -223,7 +228,9 @@ describe('SignInUsecase', () => {
       expect(refreshToken).toBeDefined();
       expect(typeof refreshToken).toBe('string');
 
-      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as { userId: string };
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as {
+        userId: string;
+      };
       expect(decoded.userId).toBe(user.id);
     });
 
@@ -237,11 +244,11 @@ describe('SignInUsecase', () => {
       // Assert
       const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
       expect(decoded.exp).toBeDefined();
-      
+
       const expiryTime = new Date(decoded.exp! * 1000);
       const now = new Date();
       const diffInDays = (expiryTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-      
+
       expect(diffInDays).toBeCloseTo(7, 0);
     });
 
@@ -253,7 +260,9 @@ describe('SignInUsecase', () => {
       const user = createUser();
 
       // Act & Assert
-      await expect(useCase.generateRefreshToken(user)).rejects.toThrow('secretOrPrivateKey must have a value');
+      await expect(useCase.generateRefreshToken(user)).rejects.toThrow(
+        'secretOrPrivateKey must have a value',
+      );
 
       process.env.REFRESH_TOKEN_SECRET = originalSecret;
     });
@@ -265,7 +274,7 @@ describe('SignInUsecase', () => {
       const email = faker.internet.email();
       const password = faker.internet.password();
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+
       const user = createUser({ email, password: hashedPassword });
 
       userAuthRepository.getUserByEmail.mockResolvedValue(user);
@@ -277,10 +286,13 @@ describe('SignInUsecase', () => {
       expect(result.token).toBeDefined();
       expect(result.refreshToken).toBeDefined();
       expect(result.token).not.toBe(result.refreshToken);
-      
+
       const tokenPayload = jwt.verify(result.token, process.env.JWT_SECRET!) as { userId: string };
-      const refreshTokenPayload = jwt.verify(result.refreshToken, process.env.REFRESH_TOKEN_SECRET!) as { userId: string };
-      
+      const refreshTokenPayload = jwt.verify(
+        result.refreshToken,
+        process.env.REFRESH_TOKEN_SECRET!,
+      ) as { userId: string };
+
       expect(tokenPayload.userId).toBe(user.id);
       expect(refreshTokenPayload.userId).toBe(user.id);
     });

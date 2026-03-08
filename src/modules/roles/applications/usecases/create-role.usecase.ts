@@ -1,11 +1,11 @@
-import { inject, injectable } from "tsyringe";
+import { IRole, RoleId } from '@/domains/roles.domain';
+import { HttpError } from '@/utils/error.utils';
 import {
-    type IRoleRepository,
-    IRoleRepositoryToken,
-} from "@modules/roles/applications/ports/role.repository";
-import { IRole, RoleId } from "@/domains/roles.domain";
-import { HttpError } from "@/utils/error.utils";
-import { Builder } from "builder-pattern";
+  type IRoleRepository,
+  IRoleRepositoryToken,
+} from '@modules/roles/applications/ports/role.repository';
+import { Builder } from 'builder-pattern';
+import { inject, injectable } from 'tsyringe';
 
 export interface ICreateRoleUsecaseCommand {
   name: string;
@@ -19,7 +19,7 @@ export interface ICreateRoleUsecaseResult {
 }
 
 export enum ECreateRoleUsecaseError {
-  ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS",
+  ROLE_ALREADY_EXISTS = 'ROLE_ALREADY_EXISTS',
 }
 
 @injectable()
@@ -29,9 +29,7 @@ export class CreateRoleUsecase {
     private readonly roleRepository: IRoleRepository,
   ) {}
 
-  async execute(
-    command: ICreateRoleUsecaseCommand,
-  ): Promise<ICreateRoleUsecaseResult> {
+  async execute(command: ICreateRoleUsecaseCommand): Promise<ICreateRoleUsecaseResult> {
     await this.validateRoleName(command.name);
     const role = await this.createRole(command.name);
 
@@ -51,8 +49,6 @@ export class CreateRoleUsecase {
   }
 
   async createRole(name: string): Promise<IRole> {
-    return await this.roleRepository.create(
-      Builder<IRole>().name(name).build(),
-    );
+    return await this.roleRepository.create(Builder<IRole>().name(name).build());
   }
 }

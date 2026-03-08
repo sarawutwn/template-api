@@ -1,9 +1,9 @@
-import { IUser, UserId } from "@domains/users.domain";
-import { IUserAuthRepository } from "@modules/auth/applications/ports/user-auth.repository";
-import { Builder } from "builder-pattern";
-import { IRole, RoleId } from "@/domains/roles.domain";
-import { injectable, inject } from "tsyringe";
-import { PrismaClient } from "@/prisma/client";
+import { IRole, RoleId } from '@/domains/roles.domain';
+import { PrismaClient } from '@/prisma/client';
+import { IUser, UserId } from '@domains/users.domain';
+import { IUserAuthRepository } from '@modules/auth/applications/ports/user-auth.repository';
+import { Builder } from 'builder-pattern';
+import { inject, injectable } from 'tsyringe';
 
 @injectable()
 export class UserAuthPrismaRepository implements IUserAuthRepository {
