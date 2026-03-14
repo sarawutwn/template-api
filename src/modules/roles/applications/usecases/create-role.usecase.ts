@@ -14,8 +14,8 @@ export interface ICreateRoleUsecaseCommand {
 export interface ICreateRoleUsecaseResult {
   id: RoleId;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum ECreateRoleUsecaseError {
@@ -36,8 +36,8 @@ export class CreateRoleUsecase {
     return {
       id: role.id,
       name: role.name,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
+      createdAt: role.createdAt.toDateString(),
+      updatedAt: role.updatedAt.toDateString(),
     };
   }
 

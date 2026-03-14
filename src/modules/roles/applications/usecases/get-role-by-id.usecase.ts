@@ -13,8 +13,8 @@ export interface IGetRoleByIdUsecaseCommand {
 export interface IGetRoleByIdUsecaseResult {
   id: RoleId;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum EGetRoleByIdUsecaseError {
@@ -34,8 +34,8 @@ export class GetRoleByIdUsecase {
     return {
       id: role.id,
       name: role.name,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
+      createdAt: role.createdAt.toISOString(),
+      updatedAt: role.updatedAt.toISOString(),
     };
   }
 

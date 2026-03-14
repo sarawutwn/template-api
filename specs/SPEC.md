@@ -58,6 +58,8 @@ src/
         ├── roles.module.ts           # DI registration for this module
         ├── adapters/
         │   ├── controllers/
+        │   │   ├── schemas/
+        │   │   │   └── role.elysia.schema.ts
         │   │   └── role.elysia.controller.ts
         │   └── repository/
         │       └── role.prisma.repository.ts
@@ -711,8 +713,8 @@ export interface ICreateRoleUsecaseCommand {
 export interface ICreateRoleUsecaseResult {
   id: RoleId;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum ECreateRoleUsecaseError {
@@ -733,8 +735,8 @@ export class CreateRoleUsecase {
     return {
       id: role.id,
       name: role.name,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
+      createdAt: role.createdAt.toISOString(),
+      updatedAt: role.updatedAt.toISOString(),
     };
   }
 
@@ -770,8 +772,8 @@ export interface IGetRoleByIdUsecaseCommand {
 export interface IGetRoleByIdUsecaseResult {
   id: RoleId;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum EGetRoleByIdUsecaseError {
@@ -791,8 +793,8 @@ export class GetRoleByIdUsecase {
     return {
       id: role.id,
       name: role.name,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
+      createdAt: role.createdAt.toISOString(),
+      updatedAt: role.updatedAt.toISOString(),
     };
   }
 
@@ -821,8 +823,8 @@ export interface IGetRolesUsecaseResult {
   roles: Array<{
     id: RoleId;
     name: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
   }>;
 }
 
@@ -840,8 +842,8 @@ export class GetRolesUsecase {
       roles: roles.map((role) => ({
         id: role.id,
         name: role.name,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
+        createdAt: role.createdAt.toISOString(),
+        updatedAt: role.updatedAt.toISOString(),
       })),
     };
   }
@@ -861,6 +863,27 @@ export class GetRolesUsecase {
 - Throw `HttpError(statusCode, ErrorEnumValue)` เมื่อเจอ error
 - ทุก method ที่เป็น step ควรเป็น `async`
 - **ห้าม** depend on concrete repository หรือ Prisma types โดยตรง ให้ depend on Port interface เท่านั้น
+- **Date fields ใน Result interface**: ต้องกำหนด type เป็น `string` (ไม่ใช่ `Date`) และแปลงค่าด้วย `.toISOString()` ใน execute method เพื่อให้ response เป็น ISO 8601 string ที่ compatible กับ JSON serialization และ OpenAPI schema:
+  ```typescript
+  // ❌ หลีกเลี่ยง: ใช้ Date type ใน Result
+  export interface IResult {
+      createdAt: Date;
+      updatedAt: Date;
+  }
+
+  // ✅ แนะนำ: ใช้ string type แล้วแปลงด้วย .toISOString()
+  export interface IResult {
+      createdAt: string;
+      updatedAt: string;
+  }
+
+  // ใน execute method:
+  return {
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
+  };
+  ```
+  **เหตุผล**: `Date` type ไม่สามารถ serialize เป็น JSON ได้โดยตรงอย่างถูกต้อง และ `t.Date()` ของ Elysia ไม่ support กับ OpenAPI ในบางกรณี การใช้ `string` + `.toISOString()` ทำให้ได้ ISO 8601 format ที่เป็นมาตรฐาน
 - **การสร้าง Domain Object ใน Use Case**: เมื่อต้องสร้าง domain object ใหม่ (เช่น ใน create usecase) ให้ใช้ `Builder<T>` pattern แทนการกำหนดค่าทุก field ด้วยตนเอง:
   ```typescript
   // ❌ หลีกเลี่ยง: การกำหนดทุก field ด้วยตนเอง
@@ -1340,6 +1363,7 @@ import { GetRolesUsecase } from '@modules/roles/applications/usecases/get-roles.
 import { Elysia, t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
 import { RoleId } from '@/domains/roles.domain';
+import { roleElysiaSchemas } from './schemas/role.elysia.schema';
 
 @injectable()
 export class RoleElysiaController {
@@ -1357,19 +1381,30 @@ export class RoleElysiaController {
           const result = await this.createRoleUsecase.execute({
             name: body.name,
           });
-          return result;
+          return {
+            statusCode: 200,
+            data: result,
+          };
         },
         {
-          body: t.Object({
-            name: t.String(),
-          }),
+          body: roleElysiaSchemas.createRoleSchema.body,
+          response: roleElysiaSchemas.createRoleSchema.response,
         },
       );
 
-      app.get('/', async () => {
-        const result = await this.getRolesUsecase.execute();
-        return result;
-      });
+      app.get(
+        '/',
+        async () => {
+          const result = await this.getRolesUsecase.execute();
+          return {
+            statusCode: 200,
+            data: result.roles,
+          };
+        },
+        {
+          response: roleElysiaSchemas.getRolesSchema.response,
+        },
+      );
 
       app.get(
         '/:id',
@@ -1377,12 +1412,16 @@ export class RoleElysiaController {
           const result = await this.getRoleByIdUsecase.execute({
             id: params.id as RoleId,
           });
-          return result;
+          return {
+            statusCode: 200,
+            data: result,
+          };
         },
         {
           params: t.Object({
             id: t.String(),
           }),
+          response: roleElysiaSchemas.getRoleByIdSchema.response,
         },
       );
 
@@ -1441,7 +1480,7 @@ export const {entity}Schemas = {
 };
 ```
 
-**ตัวอย่างจริง:**
+**ตัวอย่างจริง (UserAuth):**
 
 ```typescript
 // src/modules/auth/adapters/controllers/schemas/user-auth.elysia.schema.ts
@@ -1458,6 +1497,54 @@ export const userAuthSchemas = {
       data: t.Object({
         token: t.String(),
         refreshToken: t.String(),
+      }),
+    }),
+  },
+};
+```
+
+**ตัวอย่างจริง (Role — multiple schemas, date-time fields):**
+
+```typescript
+// src/modules/roles/adapters/controllers/schemas/role.elysia.schema.ts
+import { t } from 'elysia';
+
+export const roleElysiaSchemas = {
+  createRoleSchema: {
+    body: t.Object({
+      name: t.String(),
+    }),
+    response: t.Object({
+      statusCode: t.Number(),
+      data: t.Object({
+        id: t.String(),
+        name: t.String(),
+        createdAt: t.String({ format: 'date-time' }),
+        updatedAt: t.String({ format: 'date-time' }),
+      }),
+    }),
+  },
+  getRolesSchema: {
+    response: t.Object({
+      statusCode: t.Number(),
+      data: t.Array(
+        t.Object({
+          id: t.String(),
+          name: t.String(),
+          createdAt: t.String({ format: 'date-time' }),
+          updatedAt: t.String({ format: 'date-time' }),
+        }),
+      ),
+    }),
+  },
+  getRoleByIdSchema: {
+    response: t.Object({
+      statusCode: t.Number(),
+      data: t.Object({
+        id: t.String(),
+        name: t.String(),
+        createdAt: t.String({ format: 'date-time' }),
+        updatedAt: t.String({ format: 'date-time' }),
       }),
     }),
   },
@@ -1489,11 +1576,12 @@ app.post(
 **กฎ:**
 - Route validation schemas (body, response, query, params) MUST be defined in separate schema files under `schemas/` directory
 - Export schemas as an object with descriptive name: `{entity}Schemas`
-- แต่ละ schema ต้องมีทั้ง `body` และ `response` properties
+- แต่ละ schema ต้องมี `response` property เสมอ, ส่วน `body` ใส่เฉพาะ route ที่รับ body (POST, PUT, PATCH)
 - Response schemas ต้อง include `statusCode` (t.Number()) และ `data` wrapper ที่ match กับ actual response structure
 - Import schemas ใน controller โดยใช้ relative path: `import { entitySchemas } from './schemas/entity.elysia.schema'`
 - ใช้ Elysia's `t` factory (t.Object, t.String, t.Number, etc.) สำหรับ type definitions
-- สำหรับ multiple actions ใน controller เดียวกัน ให้เพิ่ม schema ใน object เดียวกัน: `{ signInSchema, signUpSchema, ... }`
+- สำหรับ multiple actions ใน controller เดียวกัน ให้เพิ่ม schema ใน object เดียวกัน: `{ createRoleSchema, getRolesSchema, getRoleByIdSchema }`
+- **Date fields ใน schema**: ใช้ `t.String({ format: 'date-time' })` แทน `t.Date()` เพื่อให้ compatible กับ OpenAPI specification (`t.Date()` ไม่สามารถใช้ได้ในบางกรณี)
 
 ---
 

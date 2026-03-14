@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import openapi from '@elysiajs/openapi';
-import { logger } from '@tqman/nice-logger';
 import { Elysia } from 'elysia';
 import { appModule } from './modules/app.module';
 

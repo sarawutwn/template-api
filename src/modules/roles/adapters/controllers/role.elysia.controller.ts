@@ -4,6 +4,7 @@ import { GetRolesUsecase } from '@modules/roles/applications/usecases/get-roles.
 import { Elysia, t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
 import { RoleId } from '@/domains/roles.domain';
+import { roleElysiaSchemas } from './schemas/role.elysia.schema';
 
 @injectable()
 export class RoleElysiaController {
@@ -21,19 +22,30 @@ export class RoleElysiaController {
           const result = await this.createRoleUsecase.execute({
             name: body.name,
           });
-          return result;
+          return {
+            statusCode: 200,
+            data: result,
+          };
         },
         {
-          body: t.Object({
-            name: t.String(),
-          }),
+          body: roleElysiaSchemas.createRoleSchema.body,
+          response: roleElysiaSchemas.createRoleSchema.response,
         },
       );
 
-      app.get('/', async () => {
-        const result = await this.getRolesUsecase.execute();
-        return result;
-      });
+      app.get(
+        '/',
+        async () => {
+          const result = await this.getRolesUsecase.execute();
+          return {
+            statusCode: 200,
+            data: result.roles,
+          };
+        },
+        {
+          response: roleElysiaSchemas.getRolesSchema.response,
+        },
+      );
 
       app.get(
         '/:id',
@@ -41,12 +53,16 @@ export class RoleElysiaController {
           const result = await this.getRoleByIdUsecase.execute({
             id: params.id as RoleId,
           });
-          return result;
+          return {
+            statusCode: 200,
+            data: result,
+          };
         },
         {
           params: t.Object({
             id: t.String(),
           }),
+          response: roleElysiaSchemas.getRoleByIdSchema.response,
         },
       );
 

@@ -9,8 +9,8 @@ export interface IGetRolesUsecaseResult {
   roles: Array<{
     id: RoleId;
     name: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
   }>;
 }
 
@@ -28,8 +28,8 @@ export class GetRolesUsecase {
       roles: roles.map((role) => ({
         id: role.id,
         name: role.name,
-        createdAt: role.createdAt,
-        updatedAt: role.updatedAt,
+        createdAt: role.createdAt.toISOString(),
+        updatedAt: role.updatedAt.toISOString(),
       })),
     };
   }
