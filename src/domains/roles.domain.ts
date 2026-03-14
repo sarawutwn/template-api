@@ -1,5 +1,5 @@
-import { IUser } from './users.domain';
 import { Brand } from '@/utils/brand.utils';
+import { IUser } from './users.domain';
 
 export type RoleId = Brand<string, 'RoleId'>;
 

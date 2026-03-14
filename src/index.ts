@@ -1,8 +1,8 @@
-import { appModule } from './modules/app.module';
+import 'reflect-metadata';
 import openapi from '@elysiajs/openapi';
 import { logger } from '@tqman/nice-logger';
 import { Elysia } from 'elysia';
-import 'reflect-metadata';
+import { appModule } from './modules/app.module';
 
 const app = new Elysia().use(openapi()).use(appModule);
 

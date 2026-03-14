@@ -1,9 +1,9 @@
-import { RoleId } from '@/domains/roles.domain';
 import { CreateRoleUsecase } from '@modules/roles/applications/usecases/create-role.usecase';
 import { GetRoleByIdUsecase } from '@modules/roles/applications/usecases/get-role-by-id.usecase';
 import { GetRolesUsecase } from '@modules/roles/applications/usecases/get-roles.usecase';
 import { Elysia, t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
+import { RoleId } from '@/domains/roles.domain';
 
 @injectable()
 export class RoleElysiaController {

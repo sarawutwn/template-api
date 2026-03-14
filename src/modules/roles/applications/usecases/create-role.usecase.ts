@@ -1,11 +1,11 @@
-import { IRole, RoleId } from '@/domains/roles.domain';
-import { HttpError } from '@/utils/error.utils';
 import {
   type IRoleRepository,
   IRoleRepositoryToken,
 } from '@modules/roles/applications/ports/role.repository';
 import { Builder } from 'builder-pattern';
 import { inject, injectable } from 'tsyringe';
+import { IRole, RoleId } from '@/domains/roles.domain';
+import { HttpError } from '@/utils/error.utils';
 
 export interface ICreateRoleUsecaseCommand {
   name: string;

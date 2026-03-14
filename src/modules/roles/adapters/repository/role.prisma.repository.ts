@@ -1,8 +1,8 @@
-import { PrismaClient } from '@/prisma/client';
 import { IRole, RoleId } from '@domains/roles.domain';
 import { IRoleRepository } from '@modules/roles/applications/ports/role.repository';
 import { Builder } from 'builder-pattern';
 import { inject, injectable } from 'tsyringe';
+import { PrismaClient } from '@/prisma/client';
 
 @injectable()
 export class RolePrismaRepository implements IRoleRepository {

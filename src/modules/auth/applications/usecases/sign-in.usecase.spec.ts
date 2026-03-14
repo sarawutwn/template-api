@@ -1,15 +1,15 @@
-import { IUserAuthRepository } from '../ports/user-auth.repository';
-import { ESignInUsecaseError, SignInUsecase } from './sign-in.usecase';
-import { IRole, RoleId } from '@/domains/roles.domain';
-import { IUser, UserId } from '@/domains/users.domain';
-import { HttpError } from '@/utils/error.utils';
+import 'reflect-metadata';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import 'reflect-metadata';
 import { vi } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MockProxy, mock } from 'vitest-mock-extended';
+import { RoleId } from '@/domains/roles.domain';
+import { IUser, UserId } from '@/domains/users.domain';
+import { HttpError } from '@/utils/error.utils';
+import { IUserAuthRepository } from '../ports/user-auth.repository';
+import { ESignInUsecaseError, SignInUsecase } from './sign-in.usecase';
 
 describe('SignInUsecase', () => {
   const userAuthRepository: MockProxy<IUserAuthRepository> = mock<IUserAuthRepository>();

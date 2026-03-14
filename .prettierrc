@@ -7,13 +7,19 @@
     "plugins": [
         "@trivago/prettier-plugin-sort-imports"
     ],
-    "importOrderSeparation": true,
+    "importOrderSeparation": false,
     "importOrderSortSpecifiers": true,
     "importOrderParserPlugins": [
         "typescript",
         "classProperties",
         "decorators-legacy",
         "jsx"
+    ],
+    "importOrder": [
+        "^reflect-metadata$",
+        "<THIRD_PARTY_MODULES>",
+        "^@/(.*)$",
+        "^[./]"
     ],
     "endOfLine": "lf"
 }

@@ -1,9 +1,9 @@
-import { IRole, RoleId } from '@/domains/roles.domain';
 import {
   type IRoleRepository,
   IRoleRepositoryToken,
 } from '@modules/roles/applications/ports/role.repository';
 import { inject, injectable } from 'tsyringe';
+import { IRole, RoleId } from '@/domains/roles.domain';
 
 export interface IGetRolesUsecaseResult {
   roles: Array<{

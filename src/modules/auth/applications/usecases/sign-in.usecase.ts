@@ -1,5 +1,3 @@
-import { IUser } from '@/domains/users.domain';
-import { HttpError } from '@/utils/error.utils';
 import {
   type IUserAuthRepository,
   IUserAuthRepositoryToken,
@@ -7,6 +5,8 @@ import {
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { inject, injectable } from 'tsyringe';
+import { IUser } from '@/domains/users.domain';
+import { HttpError } from '@/utils/error.utils';
 
 export interface ISignInUsecaseCommand {
   email: string;

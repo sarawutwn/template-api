@@ -1,12 +1,12 @@
-import { IRoleRepository } from '../ports/role.repository';
-import { EGetRoleByIdUsecaseError, GetRoleByIdUsecase } from './get-role-by-id.usecase';
-import { IRole, RoleId } from '@/domains/roles.domain';
-import { HttpError } from '@/utils/error.utils';
-import { faker } from '@faker-js/faker';
 import 'reflect-metadata';
+import { faker } from '@faker-js/faker';
 import { vi } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { MockProxy, mock } from 'vitest-mock-extended';
+import { IRole, RoleId } from '@/domains/roles.domain';
+import { HttpError } from '@/utils/error.utils';
+import { IRoleRepository } from '../ports/role.repository';
+import { EGetRoleByIdUsecaseError, GetRoleByIdUsecase } from './get-role-by-id.usecase';
 
 describe('GetRoleByIdUsecase', () => {
   const roleRepository: MockProxy<IRoleRepository> = mock<IRoleRepository>();

@@ -1,6 +1,7 @@
 import { SignInUsecase } from '@modules/auth/applications/usecases/sign-in.usecase';
 import { Elysia, t } from 'elysia';
 import { inject, injectable } from 'tsyringe';
+import { userAuthSchemas } from './schemas/user-auth.elysia.schema';
 
 @injectable()
 export class UserAuthElysiaController {
@@ -15,13 +16,14 @@ export class UserAuthElysiaController {
             email: body.email,
             password: body.password,
           });
-          return result;
+          return {
+            statusCode: 200,
+            data: result,
+          };
         },
         {
-          body: t.Object({
-            email: t.String(),
-            password: t.String(),
-          }),
+          body: userAuthSchemas.signInSchema.body,
+          response: userAuthSchemas.signInSchema.response,
         },
       );
 
