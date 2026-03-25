@@ -36,8 +36,8 @@ export class CreateRoleUsecase {
     return {
       id: role.id,
       name: role.name,
-      createdAt: role.createdAt.toDateString(),
-      updatedAt: role.updatedAt.toDateString(),
+      createdAt: role.createdAt.toISOString(),
+      updatedAt: role.updatedAt.toISOString(),
     };
   }
 

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import openapi from '@elysiajs/openapi';
+import { openapi } from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
 import { appModule } from './modules/app.module';
 
@@ -12,3 +12,4 @@ const server = await app.listen({
 });
 
 console.log(`🦊 Elysia is running on port ${server.server?.url.port}`);
+export type server = typeof server;
